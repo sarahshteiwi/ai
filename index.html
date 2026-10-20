@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أخلاقيات استخدام الذكاء الاصطناعي في التعليم</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --navy:#13294b; --navy-2:#1d3a66; --ink:#1f2937; --muted:#5b6475;
+  --bg:#f3f5f9; --card:#ffffff; --line:#e3e8ef;
+  --accent:#0f7d7e; --accent-soft:#e3f3f2; --gold:#b8892b;
+  --ok:#1b7a4b; --ok-soft:#e5f4ec; --bad:#b03030; --bad-soft:#fbeaea;
+  --header-h:60px; --footer-h:72px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,sans-serif;font-size:17px;line-height:1.85;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+img{max-width:100%;height:auto}
+
+/* header */
+.top{position:sticky;top:0;z-index:30;height:var(--header-h);background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;padding:0 16px}
+.icon-btn{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;color:var(--navy)}
+.icon-btn:hover{background:var(--bg)}
+.top-title{flex:1;min-width:0;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}
+.counter{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar{position:absolute;inset-inline:0;bottom:-1px;height:3px;background:transparent}
+.bar>i{display:block;height:100%;width:0;background:var(--accent);transition:width .35s ease;margin-inline-start:0}
+
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgba(10,20,40,.4);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;bottom:0;right:0;width:min(360px,88vw);background:#fff;z-index:50;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;box-shadow:-8px 0 30px rgba(0,0,0,.12)}
+.drawer.on{transform:none}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);font-weight:700;color:var(--navy)}
+.drawer nav{overflow-y:auto;padding:8px 8px 24px}
+.drawer ol{list-style:none;margin:0;padding:0}
+.nav-lesson{margin-top:10px}
+.nav-lesson-title{display:flex;gap:10px;align-items:center;font-weight:700;color:var(--navy);padding:8px 10px;font-size:15px;line-height:1.5}
+.ln{flex:none;width:26px;height:26px;border-radius:8px;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:13px}
+.nav-item{width:100%;display:flex;gap:10px;align-items:flex-start;text-align:right;background:none;border:0;border-radius:10px;padding:8px 10px;color:var(--ink);font-size:14.5px;line-height:1.6}
+.nav-item:hover{background:var(--bg)}
+.nav-item.cur{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.nav-num{color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.tick{flex:none;width:16px;height:16px;border-radius:50%;border:1.5px solid #c5cdd9;margin-top:4px}
+.nav-item.seen .tick{background:var(--accent);border-color:var(--accent);box-shadow:inset 0 0 0 3px #fff}
+
+/* screens */
+main{padding-bottom:calc(var(--footer-h) + 24px)}
+.hero{position:relative;overflow:hidden;color:#fff;background:#2c3340;min-height:240px;display:flex;align-items:center;justify-content:center;text-align:center;padding:48px 20px}
+.hero::before,.hero::after{content:"";position:absolute;inset:-40%;pointer-events:none}
+.hero::before{background:
+  linear-gradient(135deg,transparent 42%,rgba(255,255,255,.06) 42%,rgba(255,255,255,.06) 58%,transparent 58%),
+  linear-gradient(45deg,transparent 30%,rgba(0,0,0,.18) 30%,rgba(0,0,0,.18) 46%,transparent 46%);
+  background-size:220px 220px}
+.hero::after{background:radial-gradient(ellipse at 50% 120%,rgba(15,125,126,.35),transparent 60%)}
+.hero-cover{background:var(--navy);min-height:300px}
+.hero-in{position:relative;z-index:1;max-width:900px}
+.hero h1{margin:6px 0 0;font-size:clamp(28px,5.4vw,52px);line-height:1.3;font-weight:700;text-wrap:balance}
+.eyebrow{font-size:14px;opacity:.82;letter-spacing:.2px}
+.by{margin-top:14px;opacity:.85;font-size:15px}
+.banner{background:#150c29;display:flex;justify-content:center}
+.banner img{display:block;width:100%;max-width:1180px;height:auto;max-height:62vh;object-fit:contain}
+.end-logo{display:block;width:100%;max-width:420px;border-radius:14px;margin:26px auto 10px}
+.done-h{color:var(--navy);font-size:clamp(24px,4vw,34px);margin:4px 0 10px}
+.done-badge{color:#fff;width:76px;height:76px;border-radius:50%;background:var(--accent);display:grid;place-items:center;margin:0 auto 10px}
+
+.content{max-width:920px;margin:0 auto;padding:32px 16px 0}
+.content.center{text-align:center}
+.content p{margin:0 0 14px}
+.lead{font-size:18.5px;color:var(--ink)}
+.sec-h{font-size:20px;color:var(--navy);margin:28px 0 10px}
+.obj{margin:0;padding-inline-start:22px}
+.obj li{margin:6px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:4px 14px;font-size:14.5px;font-weight:500}
+.start-row{margin:34px 0 10px;display:flex;justify-content:center}
+
+/* original content blocks */
+.pdf-text-block{margin:0 0 18px}
+.pdf-text-block font,.pdf-text-block span{font-size:inherit!important}
+.content h4{font-size:19px;color:var(--navy);margin:18px 0 8px}
+.figure{margin:8px 0 22px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px}
+.figure img{display:block;border-radius:8px;width:auto;max-width:100%;max-height:80vh;margin:0 auto}
+.figure figcaption{font-size:13px;color:var(--muted);margin-top:6px}
+.video-wrap{margin:0 0 24px;border-radius:14px;overflow:hidden;background:#000;box-shadow:0 6px 24px rgba(19,41,75,.15)}
+.vid{display:block;width:100%;height:auto}
+
+.cb-listing-cards{display:grid;gap:12px;margin:6px 0 20px}
+.cb-listing-card{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.cb-listing-card-left-bar{width:5px;flex:none;background:var(--accent)}
+.cb-listing-card:nth-child(3n+2) .cb-listing-card-left-bar{background:var(--navy-2)}
+.cb-listing-card:nth-child(3n+3) .cb-listing-card-left-bar{background:var(--gold)}
+.cb-listing-card-body{padding:14px 18px}
+.cb-listing-card-title{font-weight:700;color:var(--navy);margin-bottom:4px}
+.cb-listing-card-text p{margin:0}
+
+.cb-summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0 22px}
+.cb-summary-card{background:#fff;border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:12px;padding:16px;text-align:center}
+.cb-summary-card-title{font-weight:700;color:var(--navy);margin-bottom:6px}
+.cb-summary-card-content{color:var(--muted);font-size:16px}
+.cb-summary-card-content h4{display:none}
+
+.pdf-rubric-standalone{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:10px 0 22px}
+.pdf-assignment-header{display:none}
+.pdf-assignment-rubric h4:first-child{margin-top:0}
+
+.cb-generic-section{background:var(--accent-soft);border-radius:14px;padding:18px 20px;margin:0 0 20px;font-weight:500}
+.cb-generic-section p{margin:0}
+
+.pdf-html-block{margin:6px 0 22px;overflow-x:auto}
+.pdf-html-block table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:16px}
+.pdf-html-block thead th{background:var(--navy);color:#fff;font-weight:600}
+.pdf-html-block div[style*="font-family"]{font-family:inherit!important}
+
+.acc{background:#fff;border:1px solid var(--line);border-inline-start:4px solid var(--accent);border-radius:12px;margin:0 0 12px;overflow:hidden}
+.acc summary{list-style:none;padding:14px 18px;font-weight:700;color:var(--navy);display:flex;justify-content:space-between;align-items:center;gap:10px;cursor:pointer}
+.acc summary::-webkit-details-marker{display:none}
+.acc summary::after{content:"";width:9px;height:9px;border-inline-start:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .2s;flex:none}
+.acc[open] summary::after{transform:rotate(135deg)}
+.acc-body{padding:0 18px 16px;font-size:16.5px}
+.acc-body p{margin:0 0 6px}
+.acc-body a{color:var(--navy-2);word-break:break-all}
+.acc-body ul{padding-inline-start:20px;margin:0}
+
+/* references */
+.refs{list-style:none;margin:10px 0 20px;padding:0;display:grid;gap:12px}
+.ref{display:flex;gap:14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 18px;text-decoration:none;color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.ref:hover{border-color:var(--accent);box-shadow:0 4px 16px rgba(15,125,126,.12)}
+.ref-ico{flex:none;width:40px;height:40px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.ref-txt{display:flex;flex-direction:column;min-width:0}
+.ref-t{font-weight:700;color:var(--navy)}
+.ref-s{font-size:14px;color:var(--muted)}
+
+/* video gate */
+.gate-note{display:flex;gap:10px;align-items:center;background:#fff7e6;border:1px solid #f0d9a8;color:#7a5a12;border-radius:12px;padding:10px 14px;margin:0 0 14px;font-size:15px}
+.gate-note.ok{background:var(--ok-soft);border-color:#b7dcc6;color:var(--ok)}
+.nav-item.locked{opacity:.45;cursor:not-allowed}
+.nav-item.locked .tick{border-style:dashed}
+
+/* flip cards */
+.flips{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:8px 0 22px}
+.flip{border:0;padding:0;background:none;perspective:1000px;min-height:230px;text-align:center}
+.flip-inner{position:relative;display:block;width:100%;height:100%;min-height:230px;transition:transform .5s;transform-style:preserve-3d}
+.flip[aria-pressed="true"] .flip-inner{transform:rotateY(180deg)}
+.flip-face{position:absolute;inset:0;border-radius:14px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.flip-a{background:var(--navy);color:#fff}
+.flip-b{background:#fff;border:1px solid var(--line);color:var(--ink);transform:rotateY(180deg)}
+.flip-num{font-size:30px;font-weight:700;color:#7fd3cf}
+.flip-head{font-weight:700;font-size:18px;line-height:1.5}
+.flip-b .flip-head{color:var(--accent)}
+.flip-body{font-size:15.5px;line-height:1.75}
+.flip-hint{font-size:13px;opacity:.7}
+
+/* quiz */
+.quiz{margin:4px 0 20px}
+.q{border:1px solid var(--line);background:#fff;border-radius:14px;padding:16px 18px;margin:0 0 14px}
+.q legend{font-weight:700;color:var(--navy);padding:0 6px;display:flex;gap:10px;align-items:flex-start;line-height:1.6;float:right;width:100%;margin-bottom:10px}
+.qn{flex:none;width:26px;height:26px;border-radius:8px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-size:14px;margin-top:2px}
+.opt{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:9px 12px;margin:0 0 8px;cursor:pointer;clear:both;transition:background .15s,border-color .15s}
+.opt:hover{background:var(--bg)}
+.opt input{accent-color:var(--accent);width:18px;height:18px;flex:none}
+.opt.is-ok{background:var(--ok-soft);border-color:var(--ok)}
+.opt.is-bad{background:var(--bad-soft);border-color:var(--bad)}
+.quiz-actions{display:flex;gap:10px;flex-wrap:wrap}
+.quiz-result{margin-top:14px;font-weight:700;font-size:18px;color:var(--navy)}
+
+/* buttons + footer */
+.btn{border-radius:12px;padding:10px 22px;border:1px solid transparent;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+.btn.primary{background:var(--navy);color:#fff}
+.btn.primary:hover{background:var(--navy-2)}
+.btn.ghost{background:#fff;color:var(--navy);border-color:var(--line)}
+.btn.ghost:hover{background:var(--bg)}
+.btn.big{padding:14px 40px;font-size:18px}
+.btn:disabled{opacity:.4;cursor:default}
+.foot{position:fixed;bottom:0;inset-inline:0;z-index:20;height:var(--footer-h);background:#fff;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 16px;gap:10px}
+.foot .where{font-size:13.5px;color:var(--muted);text-align:center;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:focus-visible{outline:3px solid #7fd3cf;outline-offset:2px}
+h1[tabindex]:focus,h1[tabindex]:focus-visible{outline:none}
+
+@media (max-width:600px){
+  body{font-size:16px}
+  .hero{min-height:190px;padding:36px 16px}
+  .content{padding-top:24px}
+  .foot .where{display:none}
+  .btn{padding:10px 16px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <button class="icon-btn" id="menuBtn" type="button" aria-label="قائمة الدروس" aria-controls="drawer" aria-expanded="false">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+  <div class="top-title">أخلاقيات استخدام الذكاء الاصطناعي في التعليم</div>
+  <div class="counter" id="counter"></div>
+  <div class="bar"><i id="bar"></i></div>
+</header>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="محتويات الدورة">
+  <div class="drawer-head"><span>محتويات الدورة</span>
+    <button class="icon-btn" id="closeBtn" type="button" aria-label="إغلاق"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <nav><ol>
+    <li><button type="button" class="nav-item" data-go="0"><span class="tick" aria-hidden="true"></span><span>مقدمة الدورة</span></button></li>
+    <li class="nav-lesson"><div class="nav-lesson-title"><span class="ln">1</span>مدخل إلى أخلاقيات الذكاء الاصطناعي</div><ol><li><button type="button" class="nav-item" data-go="1"><span class="tick" aria-hidden="true"></span><span class="nav-num">1.1.</span><span>مفاهيم وأسس أخلاقية</span></button></li><li><button type="button" class="nav-item" data-go="2"><span class="tick" aria-hidden="true"></span><span class="nav-num">1.2.</span><span>المحاضر والحكم الأكاديمي</span></button></li></ol></li><li class="nav-lesson"><div class="nav-lesson-title"><span class="ln">2</span>الاستخدام المسؤول والآمن للذكاء الاصطناعي</div><ol><li><button type="button" class="nav-item" data-go="3"><span class="tick" aria-hidden="true"></span><span class="nav-num">2.1.</span><span>الخصوصية والموثوقية</span></button></li><li><button type="button" class="nav-item" data-go="4"><span class="tick" aria-hidden="true"></span><span class="nav-num">2.2.</span><span>تصنيف مواقف واقعية</span></button></li></ol></li><li class="nav-lesson"><div class="nav-lesson-title"><span class="ln">3</span>التحيز والعدالة</div><ol><li><button type="button" class="nav-item" data-go="5"><span class="tick" aria-hidden="true"></span><span class="nav-num">3.1.</span><span>مصادر التحيز</span></button></li><li><button type="button" class="nav-item" data-go="6"><span class="tick" aria-hidden="true"></span><span class="nav-num">3.2.</span><span>أثر التحيز على الطلاب والتقييم العادل</span></button></li></ol></li><li class="nav-lesson"><div class="nav-lesson-title"><span class="ln">4</span>الذكاء الاصطناعي في التدريس والتقييم</div><ol><li><button type="button" class="nav-item" data-go="7"><span class="tick" aria-hidden="true"></span><span class="nav-num">4.1.</span><span>استخدامات التدريس والتقييم</span></button></li><li><button type="button" class="nav-item" data-go="8"><span class="tick" aria-hidden="true"></span><span class="nav-num">4.2.</span><span>تحليل حالة الإفصاح</span></button></li></ol></li><li class="nav-lesson"><div class="nav-lesson-title"><span class="ln">5</span>النزاهة الأكاديمية واستخدام الطلاب</div><ol><li><button type="button" class="nav-item" data-go="9"><span class="tick" aria-hidden="true"></span><span class="nav-num">5.1.</span><span>أدوات كشف المحتوى المولَّد وحدودها</span></button></li><li><button type="button" class="nav-item" data-go="10"><span class="tick" aria-hidden="true"></span><span class="nav-num">5.2.</span><span>التعامل مع حالات الاشتباه</span></button></li></ol></li><li class="nav-lesson"><div class="nav-lesson-title"><span class="ln">6</span>الملكية الفكرية والشفافية</div><ol><li><button type="button" class="nav-item" data-go="11"><span class="tick" aria-hidden="true"></span><span class="nav-num">6.1.</span><span>الملكية الفكرية والمسؤولية</span></button></li><li><button type="button" class="nav-item" data-go="12"><span class="tick" aria-hidden="true"></span><span class="nav-num">6.2.</span><span>التوثيق والتحقق من المراجع</span></button></li></ol></li><li class="nav-lesson"><div class="nav-lesson-title"><span class="ln">7</span>بناء سياسة استخدام الذكاء الاصطناعي</div><ol><li><button type="button" class="nav-item" data-go="13"><span class="tick" aria-hidden="true"></span><span class="nav-num">7.1.</span><span>عناصر السياسة التعليمية</span></button></li><li><button type="button" class="nav-item" data-go="14"><span class="tick" aria-hidden="true"></span><span class="nav-num">7.2.</span><span>نشاط عملي لكتابة سياسة المقرر</span></button></li><li><button type="button" class="nav-item" data-go="15"><span class="tick" aria-hidden="true"></span><span class="nav-num">7.3.</span><span>الاختبار النهائي</span></button></li><li><button type="button" class="nav-item" data-go="16"><span class="tick" aria-hidden="true"></span><span class="nav-num">7.4.</span><span>المراجع</span></button></li></ol></li>
+  </ol></nav>
+</aside>
+
+<main id="main">
+<section class="screen" data-i="0">
+  <div class="banner"><img src="cover.jpg" alt="أخلاقيات استخدام الذكاء الاصطناعي في التعليم — دورة تدريبية موجزة لأعضاء هيئة التدريس، عمادة التعلم الإلكتروني وتقنية المعلومات بجامعة القصيم"></div>
+  <div class="content">
+    <h2 class="sec-h" style="margin-top:0">أهداف الدورة</h2>
+    <ul class="obj"><li>تفسير المبادئ الأساسية لأخلاقيات الذكاء الاصطناعي في التعليم العالي.</li><li>تحديد المخاطر الأخلاقية المرتبطة باستخدام أدوات الذكاء الاصطناعي في الممارسة التعليمية.</li><li>تطبيق مبادئ الخصوصية والنزاهة الأكاديمية والشفافية عند استخدام الذكاء الاصطناعي.</li><li>تقييم مخرجات الذكاء الاصطناعي والتحقق من دقتها وموثوقيتها قبل اعتمادها.</li><li>اتخاذ قرارات مسؤولة بشأن استخدام الذكاء الاصطناعي في التدريس والتقييم.</li><li>إعداد سياسة واضحة لاستخدام الذكاء الاصطناعي في المقرر الدراسي.</li></ul>
+    <h2 class="sec-h">المهارات والمعارف</h2>
+    <div class="chips"><span class="chip">أخلاقيات الذكاء الاصطناعي</span><span class="chip">التعليم العالي</span><span class="chip">الخصوصية</span><span class="chip">النزاهة الأكاديمية</span><span class="chip">الملكية الفكرية</span><span class="chip">التحقق البشري</span><span class="chip">سياسات الاستخدام</span></div>
+    <div class="start-row"><button class="btn primary big" type="button" data-go="1">ابدأ الدورة</button></div>
+  </div>
+</section>
+<section class="screen" data-i="1" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 1 · مدخل إلى أخلاقيات الذكاء الاصطناعي</div>
+    <h1>مفاهيم وأسس أخلاقية</h1>
+  </div></div>
+  <div class="content"><figure class="figure"><img class="content-image" loading="lazy" src="img1-responsible-ai.png" style="max-width:100%;height:auto"/><figcaption>*تم توليد هذه الصورة باستخدام الذكاء الاصطناعي</figcaption></figure></div>
+</section>
+<section class="screen" data-i="2" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 1 · مدخل إلى أخلاقيات الذكاء الاصطناعي</div>
+    <h1>المحاضر والحكم الأكاديمي</h1>
+  </div></div>
+  <div class="content"><div class="pdf-text-block"><font> أصبح الذكاء الاصطناعي التوليدي أداة مساعدة في التعليم، ويمكنه إنتاج النصوص، وتلخيص المعلومات، واقتراح الأفكار، وإنشاء الأنشطة والمحتوى التعليمي. ومع ذلك، فإن الاستفادة من هذه الأدوات لا تعني نقل مسؤولية اتخاذ القرار إليها.<br/><br/><b>ما المقصود بالذكاء الاصطناعي التوليدي؟</b><br/>هو نوع من الذكاء الاصطناعي قادر على إنشاء محتوى جديد استنادًا إلى الأنماط التي تعلّمها من البيانات، مثل النصوص والصور والعروض والأسئلة والملخصات.<br/><br/><b>ما المقصود بالذكاء الاصطناعي المتمحور حول المحاضر؟</b><br/>هو نهج يجعل المحاضر في مركز عملية استخدام الذكاء الاصطناعي، بحيث تكون التقنية أداة لدعم المحاضر وتعزيز قدراته، وليست بديلًا عن خبرته أو حكمه المهني.<br/><br/><b>أين يأتي دور المحاضر؟</b><br/><br/>عند استخدام الذكاء الاصطناعي في العملية التعليمية، يمر الاستخدام المسؤول بثلاث مراحل :</font></div><div class="flips"><button class="flip" type="button" aria-pressed="false"><span class="flip-inner"><span class="flip-face flip-a"><span class="flip-num">أولاً</span><span class="flip-head">الذكاء الاصطناعي يقترح</span><span class="flip-hint">اضغط للكشف</span></span><span class="flip-face flip-b"><span class="flip-head">الذكاء الاصطناعي يقترح</span><span class="flip-body">نصوص وأفكار ومعلومات وخطط مناسبة</span></span></span></button><button class="flip" type="button" aria-pressed="false"><span class="flip-inner"><span class="flip-face flip-a"><span class="flip-num">ثانياً</span><span class="flip-head">المحاضر يتحقق</span><span class="flip-hint">اضغط للكشف</span></span><span class="flip-face flip-b"><span class="flip-head">المحاضر يتحقق</span><span class="flip-body">يراجع المعلومات، ويتأكد من دقتها ومصادرها وملاءمتها للسياق ا لتعليمي، وينتبه لاحتمالية وجود تحيز أو معلومات غير صحيحة.</span></span></span></button><button class="flip" type="button" aria-pressed="false"><span class="flip-inner"><span class="flip-face flip-a"><span class="flip-num">ثالثاً</span><span class="flip-head">المحاضر يقرر</span><span class="flip-hint">اضغط للكشف</span></span><span class="flip-face flip-b"><span class="flip-head">المحاضر يقرر</span><span class="flip-body">يستخدم خبرته وحكمه الأكاديمي لتحديد ما إذا كان سيعتمد المخرجات أو يعدّلها أو يرفضها</span></span></span></button></div></div>
+</section>
+<section class="screen" data-i="3" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 2 · الاستخدام المسؤول والآمن للذكاء الاصطناعي</div>
+    <h1>الخصوصية والموثوقية</h1>
+  </div></div>
+  <div class="content"><div class="cb-listing-cards"><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">الخصوصية وحماية البيانات</div><div class="cb-listing-card-text"><p>حماية البيانات الشخصية وتقليل مشاركة المعلومات الحساسة عند استخدام أدوات الذكاء الاصطناعي.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">سرية معلومات الطلبة</div><div class="cb-listing-card-text"><p>الحفاظ على سرية بيانات الطلبة وعدم كشفها أو تداولها خارج الإطار المصرّح به.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">التحيز في الأنظمة</div><div class="cb-listing-card-text"><p>التنبه إلى التحيز في أنظمة الذكاء الاصطناعي وما قد ينتج عنه من نتائج غير عادلة.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">الشفافية والمساءلة</div><div class="cb-listing-card-text"><p>وضوح طريقة الاستخدام وتحمّل المسؤولية عن القرارات والنتائج المرتبطة به.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">دقة المعلومات والهلوسة</div><div class="cb-listing-card-text"><p>الانتباه إلى دقة المعلومات ومشكلة الهلوسة في مخرجات الذكاء الاصطناعي.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">التحقق البشري</div><div class="cb-listing-card-text"><p>أهمية التحقق البشري من مخرجات الذكاء الاصطناعي قبل اعتمادها.</p>
+</div></div></div></div></div></div>
+</section>
+<section class="screen" data-i="4" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 2 · الاستخدام المسؤول والآمن للذكاء الاصطناعي</div>
+    <h1>تصنيف مواقف واقعية</h1>
+  </div></div>
+  <div class="content"><div class="pdf-text-block"><p><font>صنّف كل موقف مما يأتي إلى: <strong>استخدام آمن</strong> · <strong>يحتاج إلى ضوابط</strong> · <strong>استخدام غير مناسب</strong></font></p><p><font><font>١. الاستعانة بأداة ذكاء اصطناعي في صياغة مسودة أولية لوصف مقرر دراسي.<br/>
+٢. لصق أعمال الطلبة كاملة بأسمائهم وأرقامهم الجامعية في أداة خارجية لتوليد تغذية راجعة.<br/>
+٣. توليد عشرة أسئلة اختيار من متعدد، ثم مراجعتها والتحقق من مفاتيحها قبل الاعتماد.<br/>
+٤. اعتماد قائمة مراجع أنتجتها الأداة دون التحقق من وجودها في مصادرها الأصلية.<br/>
+٥. تلخيص محضر اجتماع إداري داخلي يتضمن أسماء منسوبين وملاحظات عليهم.<br/>
+٦. إعادة صياغة فقرة كتبتها بنفسك لتحسين وضوحها.<br/>
+٧. إسناد تقدير درجات الاختبار النهائي إلى الأداة واعتماد ما تُخرجه.<br/>
+٨. رفع بحث طالب بعد إخفاء هويته وبإذنه للحصول على مقترحات تحرير</font><font>.</font></font></p>
+</div><div class="pdf-html-block">
+<div style="font-family:system-ui,'Segoe UI',Tahoma,sans-serif">
+<table>
+<thead>
+<tr>
+<th style="padding:10px 12px;text-align:right;width:48px">#</th>
+<th style="padding:10px 12px;text-align:right;width:150px">التصنيف</th>
+<th style="padding:10px 12px;text-align:right">المبرر</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">١</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED;color:#1B7A4B;font-weight:600">آمن</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">لا بيانات شخصية، والمراجعة والحكم يبقيان عند عضو هيئة التدريس.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">٢</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED;color:#B03030;font-weight:600">غير مناسب</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">إفشاء لبيانات الطلبة وتصرّف في أعمال لا يملكها المستخدم.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">٣</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED;color:#A8802C;font-weight:600">يحتاج إلى ضوابط</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">مادة خام صالحة، بشرط مطابقة مخرجات التعلّم والتحقق من دقة المفاتيح.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">٤</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED;color:#B03030;font-weight:600">غير مناسب</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">المراجع المولَّدة تُفترض غير موجودة حتى يثبت وجودها.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">٥</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED;color:#B03030;font-weight:600">غير مناسب</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">بيانات إدارية داخلية تُعرِّف بأصحابها ولا يجب إدخالها في أداة خارجية.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">٦</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED;color:#1B7A4B;font-weight:600">آمن</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">النص أصلًا من تأليفك، ودور الأداة في الصياغة لا في المضمون.</td></tr>
+<tr><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">٧</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED;color:#B03030;font-weight:600">غير مناسب</td><td style="padding:10px 12px;border-bottom:1px solid #E2E7ED">التقييم حكم مهني لا ينتقل إلى الأداة، والمسؤولية تبقى بشرية.</td></tr>
+<tr><td style="padding:10px 12px">٨</td><td style="padding:10px 12px;color:#A8802C;font-weight:600">يحتاج إلى ضوابط</td><td style="padding:10px 12px">مقبول بشرط إخفاء الهوية وإذن الطالب واقتصار الدور على المقترحات.</td></tr>
+</tbody>
+</table>
+</div></div></div>
+</section>
+<section class="screen" data-i="5" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 3 · التحيز والعدالة</div>
+    <h1>مصادر التحيزتعرّف على مصادر التحيز وآثاره في البيئة الجامعية</h1>
+  </div></div>
+  <div class="content"><div class="pdf-text-block"><h3><span style="color:rgb(31, 41, 55)">تهدف الوحدة إلى تمكين عضو هيئة التدريس من اكتشاف التحيز في مخرجات الذكاء الاصطناعي، وضمان ألا يمس عدالة التعليم والتقييم.</span></h3><h3></h3><h3><font>التحيز الخوارزمي</font></h3><h3></h3>
+<p><font>التحيز الخوارزمي هو ميل منهجي ومتكرر في مخرجات النظام، بحيث يُفضّل فئة أو منظورًا على غيره. ويختلف عن الخطأ العارض لأنه <strong>نمط ثابت يمكن توقّعه</strong>،</font></p><p><font> لا مجرد نتيجة فردية غير مقصودة.</font></p>
+</div><div class="cb-summary-cards"><div class="cb-summary-card"><div class="cb-summary-card-title"><span>بيانات التدريب </span></div><div class="cb-summary-card-content"><div><div><span style="background-color:transparent"><font>تُدرَّب النماذج غالبًا على محتوى إنجليزي وغربي بنسبة أعلى، فيضعف تمثيل اللغة العربية والسياق المحلي.</font></span></div></div></div></div><div class="cb-summary-card"><div class="cb-summary-card-title"><span>تصميم النموذج </span></div><div class="cb-summary-card-content"><div><span style="background-color:transparent"><font> تؤثر اختيارات المطورين في ما يُعدّ إجابة "جيدة" وما يُرفض.</font></span></div></div></div><div class="cb-summary-card"><div class="cb-summary-card-title"><span>طريقة الاستخدام </span></div><div class="cb-summary-card-content"><div><span style="background-color:transparent"><font>صياغة السؤال نفسها قد توجّه النموذج نحو إجابة متحيزة.</font></span></div></div></div></div><div class="pdf-text-block"><h4><font>آثاره في البيئة الجامعية</font></h4><p><font>تظهر آثار هذا التحيز في البيئة الجامعية عندما تقدّم الأدوات التعليمية أمثلة بعيدة عن بيئة الطالب السعودي، أو عندما تعكس صورًا نمطية عن المهن والأدوار الاجتماعية، أو عندما تميل المراجع إلى مدرسة فكرية واحدة.</font></p><p><font> لذلك، لا يكفي أن تكون الإجابة صحيحة ظاهريًا؛ بل يجب أن تكون مناسبة للسياق أيضًا.</font></p><h4><font>نشاط تأملي</font></h4><p><font>اطلب من أداة ذكاء اصطناعي توليد ثلاثة أمثلة تطبيقية لمفهوم في مقررك. ثم اسأل نفسك: هل تناسب هذه الأمثلة سياق طلابك؟ وما الفئات الغائبة عنها؟</font></p></div><div class="pdf-rubric-standalone"><div class="pdf-assignment-header"><span class="pdf-assignment-icon"></span><span class="pdf-assignment-label">Assessment Criteria</span></div><div class="pdf-assignment-rubric"><h4><font>آثاره في البيئة الجامعية</font></h4><p><font>تظهر آثار هذا التحيز في البيئة الجامعية عندما تقدّم الأدوات التعليمية أمثلة بعيدة عن بيئة الطالب السعودي، أو عندما تعكس صورًا نمطية عن المهن والأدوار الاجتماعية، أو عندما تميل المراجع إلى مدرسة فكرية واحدة.</font></p><p><font> لذلك، لا يكفي أن تكون الإجابة صحيحة ظاهريًا؛ بل يجب أن تكون مناسبة للسياق أيضًا.</font></p><h4><font>نشاط تأملي</font></h4><p><font>اطلب من أداة ذكاء اصطناعي توليد ثلاثة أمثلة تطبيقية لمفهوم في مقررك. ثم اسأل نفسك: هل تناسب هذه الأمثلة سياق طلابك؟ وما الفئات الغائبة عنها؟</font></p></div></div></div>
+</section>
+<section class="screen" data-i="6" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 3 · التحيز والعدالة</div>
+    <h1>أثر التحيز على الطلاب والتقييم العادل</h1>
+  </div></div>
+  <div class="content"><div class="cb-listing-cards"><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title"><ol><li><span>عدم الاعتماد على الأداة وحدها في أي قرار يمس درجة الطالب.</span></li><li><br/></li></ol></div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title"><ol><li><span style="background-color:transparent">مراجعة عينة من مخرجات التصحيح الآلي يدويًا ومقارنتها بمعايير معلنة.</span></li><li><br/></li></ol></div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title"><ol><li><span style="background-color:transparent">اشتراط أدوات متاحة للجميع عند السماح باستخدام الذكاء الاصطناعي في ال</span><span style="background-color:transparent">مهام</span><span style="background-color:transparent">.</span></li></ol></div></div></div></div></div><div class="pdf-text-block"><p><font><strong>موقف للنقاش:</strong> استخدم أحد الزملاء أداة ذكاء اصطناعي لتقييم مقالات الطلاب، فلاحظ أن المقالات المكتوبة بلغة بسيطة حصلت على درجات أقل رغم قوة أفكارها. ما الإجراء المناسب قبل اعتماد الدرجات؟</font></p><p><strong><span>الخلاصة :</span></strong><span> العدالة مسؤولية عضو هيئة التدريس لا الأداة، والمراجعة البشرية شرط لأي استخدام يمس تقييم الطالب.</span></p></div></div>
+</section>
+<section class="screen" data-i="7" data-gate="video" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 4 · الذكاء الاصطناعي في التدريس والتقييم</div>
+    <h1>استخدامات التدريس والتقييم</h1>
+  </div></div>
+  <div class="content"><figure class="figure"><img class="content-image" loading="lazy" src="img2-teaching-assessment.png" style="max-width:100%;height:auto"/><figcaption>*تم توليد هذه الصورة باستخدام الذكاء الاصطناعي</figcaption></figure><div class="cb-listing-cards"><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">إعداد المحتوى</div><div class="cb-listing-card-text"><p>استخدام  الذكاء الاصطناعي في إعداد المحتوى والمحاضرات.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">توليد الأنشطة</div><div class="cb-listing-card-text"><p>توليد الأنشطة والأسئلة والاختبارات.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">تقييم الأعمال</div><div class="cb-listing-card-text"><p>استخدام الذكاء الاصطناعي في تقييم أعمال الطلبة.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">النزاهة الأكاديمية</div><div class="cb-listing-card-text"><p>النزاهة الأكاديمية واستخدام الطلبة للذكاء الاصطناعي.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">الكواشف</div><div class="cb-listing-card-text"><p>AI Detectors وحدود الاعتماد عليها.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">تصميم التقييمات</div><div class="cb-listing-card-text"><p>تصميم تقييمات تقلل سوء استخدام الذكاء الاصطناعي .</p>
+</div></div></div></div></div><div class="video-wrap"><video class="vid" controls="" playsinline="" poster="intro-poster.jpg" preload="metadata"><source src="intro.mp4" type="video/mp4"/></video></div></div>
+</section>
+<section class="screen" data-i="8" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 4 · الذكاء الاصطناعي في التدريس والتقييم</div>
+    <h1>تحليل حالة الإفصاح</h1>
+  </div></div>
+  <div class="content"><div class="cb-generic-section"><div class="cb-generic-item"><div class="cb-generic-item-content"><p><font>نشاط تطبيقي: تحليل حالة لطالب استخدم ChatGPT للمساعدة في كتابة بحث مع الإفصاح عن استخدامه.</font></p>
+</div></div></div><figure class="figure"><img alt="عضو هيئة تدريس يناقش طالبًا حول إفصاحه عن استخدام الذكاء الاصطناعي" class="content-image" loading="lazy" src="img5-disclosure-case.jpg"/><figcaption>*تم توليد هذه الصورة باستخدام الذكاء الاصطناعي</figcaption></figure></div>
+</section>
+<section class="screen" data-i="9" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 5 · النزاهة الأكاديمية واستخدام الطلاب</div>
+    <h1>حدود أدوات كشف المحتوى المولَّد</h1>
+  </div></div>
+  <div class="content"><div class="pdf-text-block"><p><font>تعتمد أدوات الكشف على قياس مدى <strong>توقّع</strong> النص وتجانس جمله، لا على دليل مباشر على مصدره. لذلك تبقى نتائجها احتمالية، وتظهر فيها ثلاث مشكلات موثّقة:</font></p>
+<ul><li><font><strong>الإيجابيات الكاذبة:</strong> قد تُصنِّف نصًا كتبه الطالب بنفسه على أنه مولَّد. وقد أظهرت دراسة منشورة في مجلة <em>Patterns</em> عام 2023 أن هذه الأدوات تخطئ بشكل أكبر مع كتابات غير الناطقين بالإنجليزية.</font></li></ul><ul><li><font><strong>سهولة التحايل:</strong> إعادة صياغة النص أو تعديله يدويًا تكفي غالبًا لتجاوز الكشف</font>.</li></ul><ul><li><font><strong>ضعف الدقة مع العربية:</strong> معظم الأدوات مطوَّرة ومختبرة على النصوص الإنجليزية.</font></li></ul><ol>
+</ol>
+<p><font>ومن الشواهد على ذلك أن شركة OpenAI أوقفت أداة الكشف الخاصة بها في يوليو 2023 بسبب انخفاض دقتها.</font></p>
+<h4><font>القاعدة العملية</font></h4>
+<p><font>نتيجة أداة الكشف <strong>مؤشر يستدعي التحقق</strong>، وليست دليل إدانة.</font></p></div><div class="pdf-text-block"><p><font>  رأينا في الفقرة  السابقة أن أدوات كشف المحتوى المولَّد لا تقدّم دليلًا قاطعًا، وأن الاعتماد عليها وحدها قد يظلم الطالب. فما البديل إذن؟</font></p><p><font> يكمن الحل في مرحلة أبكر: عند تصميم التقييم نفسه. فالواجب الذي تستطيع أداة ذكاء اصطناعي إنجازه كاملًا في دقائق لم يعد يقيس ما تعلّمه الطالب فعلًا. </font></p><p><font>في هذا الدرس سنتعرّف على كيفية تمييز المهام المعرّضة لذلك، وعلى استراتيجيات عملية لإعادة تصميمها بحيث تُظهر فهم الطالب وتفكيره، لا مجرد المنتج النهائي.</font>  </p></div><div class="pdf-html-block"><div style="font-family:'Tajawal', 'Segoe UI', Tahoma, sans-serif;width:100%;max-width:1100px;margin:0 auto">
+<table>
+<thead>
+<tr>
+<th style="padding:18px 22px;text-align:right;width:40%">الاستراتيجية</th>
+<th style="padding:18px 22px;text-align:right">مثال تطبيقي</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding:16px 22px;border-bottom:1px solid #e3e8ef;font-weight:700;color:#1f4e79">تقييم العملية لا المنتج فقط</td>
+<td style="padding:16px 22px;border-bottom:1px solid #e3e8ef;color:#333">تسليم مسودات متدرجة مع ملاحظات بين كل مرحلة</td>
+</tr>
+<tr>
+<td style="padding:16px 22px;border-bottom:1px solid #e3e8ef;font-weight:700;color:#1f4e79">الربط بالسياق المحلي والشخصي</td>
+<td style="padding:16px 22px;border-bottom:1px solid #e3e8ef;color:#333">تحليل حالة من القصيم أو من خبرة الطالب</td>
+</tr>
+<tr>
+<td style="padding:16px 22px;border-bottom:1px solid #e3e8ef;font-weight:700;color:#1f4e79">التقييم الشفهي</td>
+<td style="padding:16px 22px;border-bottom:1px solid #e3e8ef;color:#333">مناقشة قصيرة يشرح فيها الطالب ما كتب</td>
+</tr>
+<tr>
+<td style="padding:16px 22px;border-bottom:1px solid #e3e8ef;font-weight:700;color:#1f4e79">دمج الأداة في المهمة</td>
+<td style="padding:16px 22px;border-bottom:1px solid #e3e8ef;color:#333">نقد إجابة أنتجها الذكاء الاصطناعي وتصحيح أخطائها</td>
+</tr>
+<tr>
+<td style="padding:16px 22px;font-weight:700;color:#1f4e79">التأمل الذاتي</td>
+<td style="padding:16px 22px;color:#333">فقرة يوضح فيها الطالب كيف تغير فهمه</td>
+</tr>
+</tbody>
+</table>
+</div></div><div class="pdf-rubric-standalone"><div class="pdf-assignment-header"><span class="pdf-assignment-icon"></span><span class="pdf-assignment-label">Assessment Criteria</span></div><div class="pdf-assignment-rubric"><p><font>  رأينا في الفقرة  السابقة أن أدوات كشف المحتوى المولَّد لا تقدّم دليلًا قاطعًا، وأن الاعتماد عليها وحدها قد يظلم الطالب. فما البديل إذن؟</font></p><p><font> يكمن الحل في مرحلة أبكر: عند تصميم التقييم نفسه. فالواجب الذي تستطيع أداة ذكاء اصطناعي إنجازه كاملًا في دقائق لم يعد يقيس ما تعلّمه الطالب فعلًا. </font></p><p><font>في هذا الدرس سنتعرّف على كيفية تمييز المهام المعرّضة لذلك، وعلى استراتيجيات عملية لإعادة تصميمها بحيث تُظهر فهم الطالب وتفكيره، لا مجرد المنتج النهائي.</font>  </p></div></div></div>
+</section>
+<section class="screen" data-i="10" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 5 · النزاهة الأكاديمية واستخدام الطلاب</div>
+    <h1>التعامل مع حالات الاشتباه</h1>
+  </div></div>
+  <div class="content"><details class="acc"><summary>خطوات مقترحة:</summary><div class="acc-body"><p><strong style="background-color:transparent">  الرجوع إلى السياسة المعلنة:</strong><span style="background-color:transparent"> هل كان الاستخدام ممنوعًا بوضوح في هذه المهمة؟ </span></p><p><strong style="background-color:transparent"> جمع القرائن:</strong><span style="background-color:transparent"> مقارنة العمل بأعمال سابقة للطالب، والتحقق من مراجع مختلقة، لا نتيجة أداة الكشف وحدها.</span></p><p><strong style="background-color:transparent"> الحوار مع الطالب:</strong><span style="background-color:transparent"> لقاء هادئ يُطلب فيه شرح مراحل إعداد العمل، بافتراض حسن النية.</span></p><p><strong style="background-color:transparent"> التوثيق:</strong><span style="background-color:transparent"> تسجيل الوقائع والقرائن ورد الطالب كتابيًا.</span></p><p><strong style="background-color:transparent"> الإحالة النظامية:</strong><span style="background-color:transparent"> اتباع لوائح الجامعة الخاصة بالنزاهة الأكاديمية عند ثبوت المخالفة.</span></p></div></details><details class="acc"><summary>موقف للنقاش: أظهرت أداة كشف أن بحث طالبة "مولَّد بنسبة 85%"، وهي تؤكد أنها كتبته بنفسها وتملك مسودات سابقة. ما الخطوة التالية ؟</summary><div class="acc-body"></div></details></div>
+</section>
+<section class="screen" data-i="11" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 6 · الملكية الفكرية والشفافية</div>
+    <h1>الملكية الفكرية والمسؤولية</h1>
+  </div></div>
+  <div class="content"><figure class="figure"><img class="content-image" loading="lazy" src="img3-intellectual-property.png" style="max-width:100%;height:auto"/><figcaption>*تم توليد هذه الصورة باستخدام الذكاء الاصطناعي</figcaption></figure><div class="cb-listing-cards"><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">الملكية الفكرية</div><div class="cb-listing-card-text"><p>حقوق الملكية الفكرية عند استخدام AI.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">حقوق النشر</div><div class="cb-listing-card-text"><p>حقوق النشر والمحتوى المُولَّد بالذكاء الاصطناعي.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">استخدام المحتوى</div><div class="cb-listing-card-text"><p>استخدام الصور والنصوص والمصادر التي ينتجها AI.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">الإفصاح والتوثيق</div><div class="cb-listing-card-text"><p>توثيق استخدام الذكاء الاصطناعي والإفصاح عنه.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">المسؤولية</div><div class="cb-listing-card-text"><p>مسؤولية عضو هيئة التدريس عن المحتوى الناتج.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">التحقق من المصادر</div><div class="cb-listing-card-text"><p>التحقق من المصادر والمراجع التي يقدمها AI.</p>
+</div></div></div></div></div></div>
+</section>
+<section class="screen" data-i="12" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 6 · الملكية الفكرية والشفافية</div>
+    <h1>التوثيق والتحقق من المراجع</h1>
+  </div></div>
+  <div class="content"><div class="cb-listing-cards"><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">توثيق الاستخدام</div><div class="cb-listing-card-text"><p>توثيق استخدام الذكاء الاصطناعي والإفصاح عنه.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">مسؤولية المحتوى</div><div class="cb-listing-card-text"><p>مسؤولية عضو هيئة التدريس عن المحتوى الناتج.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">التحقق من المراجع</div><div class="cb-listing-card-text"><p>التحقق من المصادر والمراجع التي يقدمها الذكاء الاصطناعي.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">تطبيق عملي</div><div class="cb-listing-card-text"><p>تحليل محتوى مولد بالذكاء الاصطناعي وتحديد ما يحتاج إلى تحقق أو توثيق أو مراجعة للملكية الفكرية.</p>
+</div></div></div></div></div></div>
+</section>
+<section class="screen" data-i="13" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 7 · بناء سياسة استخدام الذكاء الاصطناعي</div>
+    <h1>عناصر السياسة التعليمية</h1>
+  </div></div>
+  <div class="content"><div class="cb-listing-cards"><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">سياسة واضحة</div><div class="cb-listing-card-text"><p>أهمية وجود سياسة واضحة لاستخدام الذكاء الاصطناعي في المقررات.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">الاستخدامات</div><div class="cb-listing-card-text"><p>تحديد الاستخدامات المسموحة والمشروطة وغير المسموحة.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">الإفصاح</div><div class="cb-listing-card-text"><p>الإفصاح عن استخدام الذكاء الاصطناعي.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">المسؤولية</div><div class="cb-listing-card-text"><p>مسؤولية الطالب وعضو هيئة التدريس.</p>
+</div></div></div></div><div class="cb-listing-card"><div class="cb-listing-card-left-bar"></div><div class="cb-listing-card-body"><div class="cb-listing-card-content"><div class="cb-listing-card-title">المراجعة</div><div class="cb-listing-card-text"><p>المراجعة البشرية لمخرجات الذكاء الاصطناعي.</p>
+</div></div></div></div></div><figure class="figure"><img class="content-image" loading="lazy" src="img4-course-policy.png" style="max-width:100%;height:auto"/><figcaption>*تم توليد هذه الصورة باستخدام الذكاء الاصطناعي</figcaption></figure></div>
+</section>
+<section class="screen" data-i="14" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 7 · بناء سياسة استخدام الذكاء الاصطناعي</div>
+    <h1>نشاط عملي لكتابة سياسة المقررصمّم سياسة واضحة ومتسقة مع المبادئ الوطنية ولوائح الجامعة</h1>
+  </div></div>
+  <div class="content"><div class="pdf-text-block"><p><font>عزيزي عضو هيئة التدريس،</font></p><p><font>في إطار استخدام الذكاء الاصطناعي في التعليم، يُطلب منك صياغة سياسة واضحة ومتسقة مع المبادئ الوطنية ولوائح الجامعة. الهدف من هذا النشاط هو تعزيز استخدام الذكاء الاصطناعي بشكل مسؤول وآمن في خطط المقررات الدراسية.</font></p><p><font><strong>الهدف التعليمي:</strong> صياغة سياسة واضحة ومتسقة مع المبادئ الوطنية ولوائح الجامعة.</font></p><p><strong><font>معايير المراجعة الذاتية:</font></strong></p><p><font><strong><br/></strong> أكمل القالب التالي لأحد مقرراتك.</font></p><ul><li><font>☐ السياسة مكتوبة بلغة يفهمها الطالب دون شرح إضافي.</font></li><li><font>☐ تميّز بوضوح بين المسموح والممنوع لكل نوع من المهام.</font></li><li><font>☐ تتضمن آلية إفصاح محددة.</font></li><li><font>☐ تلتزم بحماية بيانات الطلاب.</font></li><li><font>☐ لا تجعل نتيجة أداة الكشف دليلًا وحيدًا للمخالفة.</font></li><li><font>☐ تحيل إلى لوائح الجامعة المعتمدة.</font></li></ul></div><div class="pdf-html-block"><div style="font-family:'Tajawal', 'Segoe UI', Tahoma, sans-serif;width:100%;max-width:1100px;margin:0 auto;line-height:1.8;color:#333">
+<div style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1)">
+<div style="background:#1f4e79;color:#ffffff;padding:18px 22px;font-weight:700">
+سياسة استخدام الذكاء الاصطناعي — مقرر: <span style="display:inline-block;min-width:220px;border-bottom:2px dashed #ffffff"> </span>
+</div>
+<div style="padding:16px 22px;border-bottom:1px solid #e3e8ef">
+<div style="font-weight:700;color:#1f4e79">1. الموقف العام</div>
+<div>[ مسموح / مسموح بشروط / غير مسموح ]</div>
+</div>
+<div style="padding:16px 22px;border-bottom:1px solid #e3e8ef;background:#f5f8fc">
+<div style="font-weight:700;color:#1f4e79">2. الاستخدامات المسموحة</div>
+<div style="color:#666">مثل: العصف الذهني، تدقيق اللغة، شرح المفاهيم</div>
+</div>
+<div style="padding:16px 22px;border-bottom:1px solid #e3e8ef">
+<div style="font-weight:700;color:#1f4e79">3. الاستخدامات غير المسموحة</div>
+<div style="color:#666">مثل: كتابة الواجب كاملًا، الاختبارات الفردية</div>
+</div>
+<div style="padding:16px 22px;border-bottom:1px solid #e3e8ef;background:#f5f8fc">
+<div style="font-weight:700;color:#1f4e79">4. الإفصاح المطلوب</div>
+<div style="color:#666">كيف يوضح الطالب الأداة وطريقة استخدامها؟</div>
+</div>
+<div style="padding:16px 22px;border-bottom:1px solid #e3e8ef">
+<div style="font-weight:700;color:#1f4e79">5. حماية البيانات</div>
+<div style="color:#666">ما البيانات التي يُمنع إدخالها في الأدوات؟</div>
+</div>
+<div style="padding:16px 22px;border-bottom:1px solid #e3e8ef;background:#f5f8fc">
+<div style="font-weight:700;color:#1f4e79">6. استخدام عضو هيئة التدريس للأدوات</div>
+<div style="color:#666">ما الذي يُفصح عنه للطلاب في إعداد المادة أو التقييم؟</div>
+</div>
+<div style="padding:16px 22px">
+<div style="font-weight:700;color:#1f4e79">7. الإجراء عند المخالفة</div>
+<div style="color:#666">الخطوات والمرجع النظامي في لوائح الجامعة</div>
+</div>
+</div>
+</div></div></div>
+</section>
+<section class="screen" data-i="15" data-gate="quiz" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 7 · بناء سياسة استخدام الذكاء الاصطناعي</div>
+    <h1>الاختبار النهائي</h1>
+  </div></div>
+  <div class="content"><div class="quiz"><fieldset class="q" data-correct="3"><legend><span class="qn">1</span>ما هي أبرز المخاطر المرتبطة بالخصوصية عند استخدام الذكاء الاصطناعي في التعليم العالي؟</legend><label class="opt"><input type="radio" name="q0" value="0"><span>تحسين تجربة التعلم</span></label><label class="opt"><input type="radio" name="q0" value="1"><span>زيادة فعالية التعليم</span></label><label class="opt"><input type="radio" name="q0" value="2"><span>تقليل التكاليف التعليمية</span></label><label class="opt"><input type="radio" name="q0" value="3"><span>الاعتداء على بيانات الطلاب الشخصية</span></label></fieldset><fieldset class="q" data-correct="3"><legend><span class="qn">2</span>كيف يمكن لأعضاء هيئة التدريس ضمان النزاهة الأكاديمية عند استخدام أدوات الذكاء الاصطناعي في البحث؟</legend><label class="opt"><input type="radio" name="q1" value="0"><span>اعتماد نتائج الذكاء الاصطناعي بشكل قاطع</span></label><label class="opt"><input type="radio" name="q1" value="1"><span>السماح للطلاب بكتابة تقارير دون المراقبة</span></label><label class="opt"><input type="radio" name="q1" value="2"><span>تجنب الاعتراف بمصادر المعلومات</span></label><label class="opt"><input type="radio" name="q1" value="3"><span>استخدام خوارزميات دقيقة ومراجعة النتائج بشكل دوري</span></label></fieldset><fieldset class="q" data-correct="0"><legend><span class="qn">3</span>ما هي الطريقة المثلى لحماية الملكية الفكرية عند استخدام الذكاء الاصطناعي في المناهج الدراسية؟</legend><label class="opt"><input type="radio" name="q2" value="0"><span>تقديم الشكر للأدوات المستخدمة بشكل واضح</span></label><label class="opt"><input type="radio" name="q2" value="1"><span>تطوير المحتوى دون أن يتماشى مع القوانين المعمول بها</span></label><label class="opt"><input type="radio" name="q2" value="2"><span>تقليل استخدام المصادر المفتوحة</span></label><label class="opt"><input type="radio" name="q2" value="3"><span>عدم الإشارة لأي مصادر خارجية</span></label></fieldset><fieldset class="q" data-correct="1"><legend><span class="qn">4</span>ما هو العنصر الأساسي الذي يجب على المعلم أخذه في الاعتبار عند اتخاذ قرار بشأن استخدام الذكاء الاصطناعي في الفصول الدراسية؟</legend><label class="opt"><input type="radio" name="q3" value="0"><span>فوائد استخدامه دون مراعاة المخاطر</span></label><label class="opt"><input type="radio" name="q3" value="1"><span>حماية خصوصية الطلاب وضمان نزاهة المعلومات</span></label><label class="opt"><input type="radio" name="q3" value="2"><span>تكاليف تطبيق التكنولوجيا</span></label><label class="opt"><input type="radio" name="q3" value="3"><span>تقنيات التعليم دون النظر إلى احتياجات الطلاب</span></label></fieldset><fieldset class="q" data-correct="1"><legend><span class="qn">5</span>ما هو الخطأ الشائع الذي يرتكبه المعلمون عند استخدام الذكاء الاصطناعي في تقييم الطلاب؟</legend><label class="opt"><input type="radio" name="q4" value="0"><span>التأكيد على مجموعة متنوعة من أساليب التقييم</span></label><label class="opt"><input type="radio" name="q4" value="1"><span>إعطاء الدرجة النهائية بناءً على تقييمات الذكاء الاصطناعي فقط</span></label><label class="opt"><input type="radio" name="q4" value="2"><span>استخدام نماذج تقييم متعددة</span></label><label class="opt"><input type="radio" name="q4" value="3"><span>التفاعل مع الطلاب ومراجعة تقدمهم بشكل دوري</span></label></fieldset><fieldset class="q" data-correct="0"><legend><span class="qn">6</span>ما هو الدور الهام لأعضاء هيئة التدريس في تعزيز أخلاقيات استخدام الذكاء الاصطناعي في التعليم العالي؟</legend><label class="opt"><input type="radio" name="q5" value="0"><span>توفير معلومات دقيقة حول الاستخدام الأخلاقي للذكاء الاصطناعي</span></label><label class="opt"><input type="radio" name="q5" value="1"><span>عدم مناقشة القضايا الأخلاقية مع الطلاب</span></label><label class="opt"><input type="radio" name="q5" value="2"><span>تجاهل التأثيرات الثقافية والاجتماعية للذكاء الاصطناعي</span></label><label class="opt"><input type="radio" name="q5" value="3"><span>توجيه الطلاب إلى الاعتماد الكامل على أدوات الذكاء الاصطناعي</span></label></fieldset><fieldset class="q" data-correct="1"><legend><span class="qn">7</span>أظهرت أداة كشف أن عمل طالب مولَّد بنسبة عالية. ما الإجراء الأنسب؟</legend><label class="opt"><input type="radio" name="q6" value="0"><span>منح الطالب صفرًا مباشرة</span></label><label class="opt"><input type="radio" name="q6" value="1"><span>جمع قرائن أخرى ومحاورة الطالب قبل أي قرار</span></label><label class="opt"><input type="radio" name="q6" value="2"><span>تجاهل النتيجة تمامًا</span></label><label class="opt"><input type="radio" name="q6" value="3"><span>فحص العمل بأداة كشف ثانية واعتماد النتيجة إذا تطابقت</span></label></fieldset><fieldset class="q" data-correct="1"><legend><span class="qn">8</span>ما الفرق بين التحيز الخوارزمي والخطأ العارض؟</legend><label class="opt"><input type="radio" name="q7" value="0"><span>التحيز يحدث في النصوص العربية فقط</span></label><label class="opt"><input type="radio" name="q7" value="1"><span>التحيز نمط منهجي متكرر، والخطأ العارض غير متوقع</span></label><label class="opt"><input type="radio" name="q7" value="2"><span>الخطأ العارض أخطر لأنه يتكرر في كل المخرجات</span></label><label class="opt"><input type="radio" name="q7" value="3"><span>لا فرق بينهما</span></label></fieldset><div class="quiz-actions"><button class="btn primary" id="checkQuiz" type="button">تحقق من إجاباتي</button><button class="btn ghost" id="resetQuiz" type="button" hidden>أعد المحاولة</button></div><div class="quiz-result" id="quizResult" role="status"></div></div></div>
+</section>
+<section class="screen" data-i="16" hidden>
+  <div class="hero"><div class="hero-in">
+    <div class="eyebrow">الوحدة 7 · بناء سياسة استخدام الذكاء الاصطناعي</div>
+    <h1>المراجع</h1>
+  </div></div>
+  <div class="content"><p class="lead">اعتمدت هذه الدورة على مصادر ومراجع موثوقة حول الاستخدام المسؤول والأخلاقي للذكاء الاصطناعي في التعليم. اضغط على أي مرجع لفتحه.</p><ul class="refs"><li><a class="ref" href="https://sdaia.gov.sa/ar/SDAIA/about/Documents/ai-principles.pdf" target="_blank" rel="noopener noreferrer"><span class="ref-ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg></span><span class="ref-txt"><span class="ref-t">مبادئ أخلاقيات الذكاء الاصطناعي</span><span class="ref-s">الهيئة السعودية للبيانات والذكاء الاصطناعي (سدايا)</span></span></a></li><li><a class="ref" href="https://www.unesco.org/en/artificial-intelligence/recommendation-ethics" target="_blank" rel="noopener noreferrer"><span class="ref-ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg></span><span class="ref-txt"><span class="ref-t">التوصية الخاصة بأخلاقيات الذكاء الاصطناعي</span><span class="ref-s">منظمة اليونسكو</span></span></a></li><li><a class="ref" href="https://openai.com/index/new-ai-classifier-for-indicating-ai-written-text/" target="_blank" rel="noopener noreferrer"><span class="ref-ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg></span><span class="ref-txt"><span class="ref-t">New AI classifier for indicating AI-written text</span><span class="ref-s">OpenAI</span></span></a></li></ul></div>
+</section>
+<section class="screen" data-i="17" hidden>
+  <div class="banner"><img src="closing.jpg" alt="ختامًا: الاستخدام المسؤول للذكاء الاصطناعي يحفظ الحقوق، ويعزّز الثقة، ويدعم التميز الأكاديمي"></div>
+  <div class="content center">
+    <div class="done-badge" aria-hidden="true"><svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <h1 class="done-h">أحسنت، أكملت الدورة</h1>
+    <p class="lead">شكرًا لمشاركتك.</p>
+    <div class="start-row"><button class="btn ghost" type="button" data-go="0">العودة إلى البداية</button></div>
+    <img class="end-logo" src="qu-logo.jpg" alt="جامعة القصيم — عمادة التعلم الإلكتروني وتقنية المعلومات">
+  </div>
+</section></main>
+
+<footer class="foot">
+  <button class="btn ghost" id="prevBtn" type="button">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>السابق</button>
+  <div class="where" id="where"></div>
+  <button class="btn primary" id="nextBtn" type="button">التالي
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+</footer>
+
+<script>
+(function(){
+  var TOTAL = 17;
+  var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
+  var navItems = Array.prototype.slice.call(document.querySelectorAll('.nav-item'));
+  var KEY = 'ai-ethics-course-v1';
+  var state = {i:0, seen:{}};
+  try { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && typeof s.i === 'number') state = s; } catch(e){}
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+  function pauseVideos(){ document.querySelectorAll('video').forEach(function(v){ try{v.pause();}catch(e){} }); }
+
+  state.unlocked = state.unlocked || {};
+  function gateBefore(i){ // first locked gate screen strictly before i
+    for (var k = 0; k < i; k++){ var s = screens[k]; if (s && s.dataset.gate && !state.unlocked[k]) return k; }
+    return -1;
+  }
+  function go(i, focus, stay){
+    i = Math.max(0, Math.min(TOTAL, i));
+    var g = gateBefore(i); if (g !== -1) i = g;
+    var changed = !stay;
+    if (changed) pauseVideos();
+    screens.forEach(function(s){ s.hidden = (+s.dataset.i !== i); });
+    state.i = i; state.seen[i] = 1; save();
+    navItems.forEach(function(n){
+      var g = +n.dataset.go;
+      n.classList.toggle('cur', g === i);
+      n.classList.toggle('seen', !!state.seen[g]);
+      var lk = gateBefore(g) !== -1; n.classList.toggle('locked', lk); n.setAttribute('aria-disabled', lk ? 'true' : 'false');
+      if (g === i) n.setAttribute('aria-current','page'); else n.removeAttribute('aria-current');
+    });
+    document.getElementById('prevBtn').disabled = (i === 0);
+    var next = document.getElementById('nextBtn');
+    var gated = !!(screens[i].dataset.gate && !state.unlocked[i]);
+    next.disabled = (i === TOTAL) || gated;
+    next.title = gated ? (screens[i].dataset.gate === 'quiz' ? 'يرجى اجتياز الاختبار للمتابعة' : 'يرجى مشاهدة المقطع كاملًا للمتابعة') : '';
+    next.firstChild.nodeValue = (i === TOTAL - 1) ? 'إنهاء ' : 'التالي ';
+    document.getElementById('counter').textContent = i === 0 ? 'المقدمة' : (i === TOTAL ? 'مكتملة' : (i + ' / ' + (TOTAL - 1)));
+    document.getElementById('bar').style.width = (i / TOTAL * 100) + '%';
+    var cur = screens[i], eb = cur.querySelector('.eyebrow'), h = cur.querySelector('h1');
+    document.getElementById('where').textContent = h ? h.textContent : '';
+    if (changed) window.scrollTo(0, 0);
+    if (focus && h) { h.setAttribute('tabindex','-1'); h.focus({preventScroll:true}); }
+  }
+
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('[data-go]');
+    if (t) { go(+t.dataset.go, true); closeDrawer(); return; }
+    var f = e.target.closest('.flip');
+    if (f) { f.setAttribute('aria-pressed', f.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); }
+  });
+  document.getElementById('prevBtn').onclick = function(){ go(state.i - 1, true); };
+  document.getElementById('nextBtn').onclick = function(){ go(state.i + 1, true); };
+
+  var drawer = document.getElementById('drawer'), scrim = document.getElementById('scrim'), menuBtn = document.getElementById('menuBtn');
+  function openDrawer(){ drawer.classList.add('on'); scrim.classList.add('on'); menuBtn.setAttribute('aria-expanded','true'); }
+  function closeDrawer(){ drawer.classList.remove('on'); scrim.classList.remove('on'); menuBtn.setAttribute('aria-expanded','false'); }
+  menuBtn.onclick = openDrawer; scrim.onclick = closeDrawer; document.getElementById('closeBtn').onclick = closeDrawer;
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') closeDrawer(); });
+
+  // quiz
+  var check = document.getElementById('checkQuiz'), reset = document.getElementById('resetQuiz'), res = document.getElementById('quizResult');
+  var PASS = 6; // passing score out of 8
+  var quizSec = document.querySelector('.screen[data-gate="quiz"]');
+  var quizIdx = quizSec ? +quizSec.dataset.i : -1;
+  var quizNote = null;
+  function quizPaint(){
+    if (!quizNote) return;
+    var ok = !!state.unlocked[quizIdx];
+    quizNote.className = 'gate-note' + (ok ? ' ok' : '');
+    quizNote.textContent = ok ? '✓ تم اجتياز الاختبار، ويمكنك الآن الانتقال إلى الصفحة التالية.' : 'يرجى اجتياز الاختبار للانتقال إلى الصفحة التالية، ودرجة الاجتياز ' + PASS + ' من 8.';
+  }
+  if (quizSec) {
+    quizNote = document.createElement('div'); quizNote.setAttribute('role','status');
+    quizSec.querySelector('.quiz').before(quizNote); quizPaint();
+  }
+  if (check) {
+    check.onclick = function(){
+      var qs = document.querySelectorAll('.q'), score = 0, missing = 0;
+      qs.forEach(function(q){ if (!q.querySelector('input:checked')) missing++; });
+      if (missing) { res.textContent = 'يرجى الإجابة عن جميع الأسئلة، وعدد الأسئلة المتبقية: ' + missing + '.'; res.style.color = 'var(--bad)'; return; }
+      qs.forEach(function(q){
+        var c = +q.dataset.correct;
+        q.querySelectorAll('.opt').forEach(function(o, idx){
+          var inp = o.querySelector('input'); inp.disabled = true;
+          if (idx === c) o.classList.add('is-ok');
+          else if (inp.checked) o.classList.add('is-bad');
+        });
+        if (+q.querySelector('input:checked').value === c) score++;
+      });
+      var passed = score >= PASS;
+      res.textContent = 'نتيجتك: ' + score + ' من ' + qs.length + (passed ? ' — اجتزت الاختبار بنجاح.' : ' — لم تجتز الاختبار، يرجى إعادة المحاولة. درجة الاجتياز ' + PASS + ' من ' + qs.length + '.');
+      res.style.color = passed ? 'var(--ok)' : 'var(--bad)';
+      if (passed && quizIdx !== -1) { state.unlocked[quizIdx] = 1; save(); quizPaint(); go(state.i, false, true); }
+      check.hidden = true; reset.hidden = false;
+    };
+    reset.onclick = function(){
+      document.querySelectorAll('.q .opt').forEach(function(o){ o.classList.remove('is-ok','is-bad'); var i = o.querySelector('input'); i.disabled = false; i.checked = false; });
+      res.textContent = ''; res.style.color = ''; check.hidden = false; reset.hidden = true;
+    };
+  }
+
+  // video gate: learner must watch the whole clip before moving on
+  screens.forEach(function(sec, idx){
+    if (!sec.dataset.gate) return;
+    var v = sec.querySelector('video'); if (!v) return;
+    var note = document.createElement('div'); note.className = 'gate-note'; note.setAttribute('role','status');
+    v.closest('.video-wrap').before(note);
+    function paint(){
+      var ok = !!state.unlocked[idx];
+      note.className = 'gate-note' + (ok ? ' ok' : '');
+      note.textContent = ok ? '✓ تمت مشاهدة المقطع، ويمكنك الآن الانتقال إلى الدرس التالي.' : 'يرجى مشاهدة المقطع كاملًا للانتقال إلى الدرس التالي.';
+    }
+    paint();
+    var maxT = 0;
+    v.addEventListener('timeupdate', function(){ if (!v.seeking && v.currentTime > maxT) maxT = v.currentTime; });
+    v.addEventListener('seeking', function(){ if (!state.unlocked[idx] && v.currentTime > maxT + 1) v.currentTime = maxT; });
+    v.addEventListener('ended', function(){ state.unlocked[idx] = 1; save(); paint(); go(state.i, false, true); });
+  });
+
+  go(state.i || 0, false);
+})();
+</script>
+</body>
+</html>
